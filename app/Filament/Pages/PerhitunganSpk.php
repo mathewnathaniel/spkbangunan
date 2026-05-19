@@ -39,10 +39,13 @@ class PerhitunganSpk extends Page
         $service = new SpkService();
         $this->ahpWeights      = $service->calculateAhpWeights();
         $this->consistencyData = $service->calculateConsistencyRatio();
-        $this->rankingResults  = RankingResult::with(['brand.category'])
+        $results = RankingResult::with(['brand.category'])
             ->orderBy('ranking')
-            ->get()
-            ->toArray();
+            ->get();
+
+        $this->rankingResults = $results->groupBy(function($item) {
+            return $item->brand->category->name ?? 'Lainnya';
+        })->toArray();
     }
 
     protected function getHeaderActions(): array

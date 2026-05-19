@@ -106,66 +106,67 @@
             description="Klik tombol 'Hitung Ulang Ranking' di atas untuk memperbarui hasil perhitungan."
         >
             @if(count($rankingResults) > 0)
-                <div class="rounded-xl overflow-hidden ring-1 ring-gray-950/5 dark:ring-white/10">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-white/5">
-                                <tr>
-                                    <th class="px-4 py-3 font-medium text-gray-500 dark:text-gray-400 text-center">Rank</th>
-                                    <th class="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Brand</th>
-                                    <th class="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Kategori</th>
-                                    <th class="px-4 py-3 font-medium text-gray-500 dark:text-gray-400 text-center">Harga (norm.)</th>
-                                    <th class="px-4 py-3 font-medium text-gray-500 dark:text-gray-400 text-center">Kualitas (norm.)</th>
-                                    <th class="px-4 py-3 font-medium text-gray-500 dark:text-gray-400 text-center">Minat Pasar (norm.)</th>
-                                    <th class="px-4 py-3 font-semibold text-primary-600 dark:text-primary-400 text-center bg-primary-50 dark:bg-primary-900/20">Skor Akhir</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200 dark:divide-white/5">
-                                @foreach($rankingResults as $result)
-                                    @php
-                                        $details = is_array($result['detail_scores']) ? $result['detail_scores'] : json_decode($result['detail_scores'] ?? '{}', true);
-                                        $rank = $result['ranking'];
-                                        
-                                        $rowClass = 'bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50';
-                                        if ($rank === 1) $rowClass = 'bg-amber-50/50 dark:bg-amber-900/10 hover:bg-amber-50 dark:hover:bg-amber-900/20';
-                                        elseif ($rank === 2) $rowClass = 'bg-gray-50 dark:bg-gray-800/30 hover:bg-gray-100 dark:hover:bg-gray-800/50';
-                                        elseif ($rank === 3) $rowClass = 'bg-orange-50/30 dark:bg-orange-900/10 hover:bg-orange-50/50 dark:hover:bg-orange-900/20';
-                                        
-                                        $medal = match($rank) {
-                                            1 => '🥇',
-                                            2 => '🥈',
-                                            3 => '🥉',
-                                            default => $rank,
-                                        };
-                                    @endphp
-                                    <tr class="{{ $rowClass }} transition duration-75">
-                                        <td class="px-4 py-3 text-center font-bold {{ $rank <= 3 ? 'text-2xl' : 'text-gray-500 dark:text-gray-400' }}">{{ $medal }}</td>
-                                        <td class="px-4 py-3 font-semibold text-gray-900 dark:text-white">{{ $result['brand']['name'] }}</td>
-                                        <td class="px-4 py-3">
-                                            <x-filament::badge color="gray">
-                                                {{ $result['brand']['category']['name'] ?? '-' }}
-                                            </x-filament::badge>
-                                        </td>
-                                        <td class="px-4 py-3 text-center">
-                                            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($details['harga']['normalized'] ?? 0, 4) }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">× {{ number_format($details['harga']['weight'] ?? 0, 3) }}</div>
-                                        </td>
-                                        <td class="px-4 py-3 text-center">
-                                            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($details['kualitas']['normalized'] ?? 0, 4) }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">× {{ number_format($details['kualitas']['weight'] ?? 0, 3) }}</div>
-                                        </td>
-                                        <td class="px-4 py-3 text-center">
-                                            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($details['minat_pasar']['normalized'] ?? 0, 4) }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">× {{ number_format($details['minat_pasar']['weight'] ?? 0, 3) }}</div>
-                                        </td>
-                                        <td class="px-4 py-3 text-center font-bold text-lg text-primary-600 dark:text-primary-400 bg-primary-50/50 dark:bg-primary-900/10">
-                                            {{ number_format((float) $result['final_score'], 4) }}
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="space-y-8">
+                    @foreach($rankingResults as $categoryName => $results)
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Kategori: {{ $categoryName }}</h3>
+                            <div class="rounded-xl overflow-hidden ring-1 ring-gray-950/5 dark:ring-white/10">
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm text-left">
+                                        <thead class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-white/5">
+                                            <tr>
+                                                <th class="px-4 py-3 font-medium text-gray-500 dark:text-gray-400 text-center">Rank</th>
+                                                <th class="px-4 py-3 font-medium text-gray-500 dark:text-gray-400">Brand</th>
+                                                <th class="px-4 py-3 font-medium text-gray-500 dark:text-gray-400 text-center">Harga (norm.)</th>
+                                                <th class="px-4 py-3 font-medium text-gray-500 dark:text-gray-400 text-center">Kualitas (norm.)</th>
+                                                <th class="px-4 py-3 font-medium text-gray-500 dark:text-gray-400 text-center">Minat Pasar (norm.)</th>
+                                                <th class="px-4 py-3 font-semibold text-primary-600 dark:text-primary-400 text-center bg-primary-50 dark:bg-primary-900/20">Skor Akhir</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200 dark:divide-white/5">
+                                            @foreach($results as $result)
+                                                @php
+                                                    $details = is_array($result['detail_scores']) ? $result['detail_scores'] : json_decode($result['detail_scores'] ?? '{}', true);
+                                                    $rank = $result['ranking'];
+                                                    
+                                                    $rowClass = 'bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50';
+                                                    if ($rank === 1) $rowClass = 'bg-amber-50/50 dark:bg-amber-900/10 hover:bg-amber-50 dark:hover:bg-amber-900/20';
+                                                    elseif ($rank === 2) $rowClass = 'bg-gray-50 dark:bg-gray-800/30 hover:bg-gray-100 dark:hover:bg-gray-800/50';
+                                                    elseif ($rank === 3) $rowClass = 'bg-orange-50/30 dark:bg-orange-900/10 hover:bg-orange-50/50 dark:hover:bg-orange-900/20';
+                                                    
+                                                    $medal = match($rank) {
+                                                        1 => '🥇',
+                                                        2 => '🥈',
+                                                        3 => '🥉',
+                                                        default => $rank,
+                                                    };
+                                                @endphp
+                                                <tr class="{{ $rowClass }} transition duration-75">
+                                                    <td class="px-4 py-3 text-center font-bold {{ $rank <= 3 ? 'text-2xl' : 'text-gray-500 dark:text-gray-400' }}">{{ $medal }}</td>
+                                                    <td class="px-4 py-3 font-semibold text-gray-900 dark:text-white">{{ $result['brand']['name'] }}</td>
+                                                    <td class="px-4 py-3 text-center">
+                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($details['harga']['normalized'] ?? 0, 4) }}</div>
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">× {{ number_format($details['harga']['weight'] ?? 0, 3) }}</div>
+                                                    </td>
+                                                    <td class="px-4 py-3 text-center">
+                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($details['kualitas']['normalized'] ?? 0, 4) }}</div>
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">× {{ number_format($details['kualitas']['weight'] ?? 0, 3) }}</div>
+                                                    </td>
+                                                    <td class="px-4 py-3 text-center">
+                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($details['minat_pasar']['normalized'] ?? 0, 4) }}</div>
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">× {{ number_format($details['minat_pasar']['weight'] ?? 0, 3) }}</div>
+                                                    </td>
+                                                    <td class="px-4 py-3 text-center font-bold text-lg text-primary-600 dark:text-primary-400 bg-primary-50/50 dark:bg-primary-900/10">
+                                                        {{ number_format((float) $result['final_score'], 4) }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             @else
                 <div class="flex flex-col items-center justify-center p-8 text-center bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">

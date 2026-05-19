@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AhpComparison;
 use App\Models\Brand;
 use App\Models\BrandScore;
+use App\Models\Category;
 use App\Models\Criteria;
 use App\Models\RankingResult;
 use Illuminate\Support\Collection;
@@ -98,26 +99,11 @@ class SpkService
     public function calculateSawRanking(): void
     {
         $criterias = Criteria::all();
-        $brands    = Brand::with('score')->get();
+        $categories = Category::with('brands.score')->get();
         $weights   = $this->calculateAhpWeights();
 
-        if ($brands->isEmpty() || $criterias->isEmpty() || empty($weights)) {
+        if ($categories->isEmpty() || $criterias->isEmpty() || empty($weights)) {
             return;
-        }
-
-        // Kumpulkan nilai tiap kriteria untuk normalisasi
-        $criteriaValues = [];
-        foreach (['harga', 'kualitas', 'minat_pasar'] as $field) {
-            $criteriaValues[$field] = $brands->map(fn($b) => $b->score ? (float) $b->score->{$field} : 0)->toArray();
-        }
-
-        // Tentukan max dan min untuk normalisasi
-        $maxMin = [];
-        foreach (['harga', 'kualitas', 'minat_pasar'] as $field) {
-            $maxMin[$field] = [
-                'max' => max($criteriaValues[$field]) ?: 1,
-                'min' => min($criteriaValues[$field]) ?: 1,
-            ];
         }
 
         // Tentukan jenis tiap kriteria dari database
@@ -134,73 +120,97 @@ class SpkService
             'minat_pasar' => 'minat pasar',
         ];
 
-        // Hitung skor SAW untuk setiap brand
-        $scores = [];
-        foreach ($brands as $brand) {
-            if (! $brand->score) {
-                $scores[$brand->id] = 0;
+        foreach ($categories as $category) {
+            $brands = $category->brands;
+            if ($brands->isEmpty()) {
                 continue;
             }
 
-            $finalScore   = 0;
-            $detailScores = [];
-
+            // Kumpulkan nilai tiap kriteria untuk normalisasi per kategori
+            $criteriaValues = [];
             foreach (['harga', 'kualitas', 'minat_pasar'] as $field) {
-                $rawValue  = (float) $brand->score->{$field};
-                $criteriaName = $fieldCriteriaMap[$field];
-                $type = $criteriaTypes[$criteriaName] ?? 'benefit';
+                $criteriaValues[$field] = $brands->map(fn($b) => $b->score ? (float) $b->score->{$field} : 0)->toArray();
+            }
 
-                // Normalisasi SAW
-                if ($type === 'cost') {
-                    // Cost: min / nilai
-                    $normalized = $maxMin[$field]['min'] > 0 && $rawValue > 0
-                        ? $maxMin[$field]['min'] / $rawValue
-                        : 0;
-                } else {
-                    // Benefit: nilai / max
-                    $normalized = $maxMin[$field]['max'] > 0
-                        ? $rawValue / $maxMin[$field]['max']
-                        : 0;
-                }
-
-                // Cari bobot berdasarkan nama kriteria
-                $criteriaId = $criterias->firstWhere('name', ucfirst($criteriaName))?->id
-                    ?? $criterias->firstWhere('name', ucwords($criteriaName))?->id
-                    ?? $criterias->filter(fn($c) => strtolower($c->name) === $criteriaName)->first()?->id;
-
-                $weight = $criteriaId ? ($weights[$criteriaId] ?? 0) : 0;
-
-                $weightedScore = $normalized * $weight;
-                $finalScore   += $weightedScore;
-
-                $detailScores[$field] = [
-                    'raw'        => $rawValue,
-                    'normalized' => round($normalized, 6),
-                    'weight'     => round($weight, 6),
-                    'weighted'   => round($weightedScore, 6),
-                    'type'       => $type,
+            // Tentukan max dan min untuk normalisasi per kategori
+            $maxMin = [];
+            foreach (['harga', 'kualitas', 'minat_pasar'] as $field) {
+                // Ensure arrays are not empty before passing to max/min
+                $values = !empty($criteriaValues[$field]) ? $criteriaValues[$field] : [1];
+                $maxMin[$field] = [
+                    'max' => max($values) ?: 1,
+                    'min' => min($values) ?: 1,
                 ];
             }
 
-            $scores[$brand->id] = $finalScore;
+            // Hitung skor SAW untuk setiap brand di kategori ini
+            $scores = [];
+            foreach ($brands as $brand) {
+                if (! $brand->score) {
+                    $scores[$brand->id] = 0;
+                    continue;
+                }
 
-            // Simpan detail ke tabel ranking_results (update atau create)
-            RankingResult::updateOrCreate(
-                ['brand_id' => $brand->id],
-                [
-                    'final_score'   => $finalScore,
-                    'ranking'       => 0, // akan di-update setelah sorting
-                    'detail_scores' => $detailScores,
-                ]
-            );
-        }
+                $finalScore   = 0;
+                $detailScores = [];
 
-        // Urutkan dan update ranking
-        arsort($scores);
-        $rank = 1;
-        foreach ($scores as $brandId => $score) {
-            RankingResult::where('brand_id', $brandId)->update(['ranking' => $rank]);
-            $rank++;
+                foreach (['harga', 'kualitas', 'minat_pasar'] as $field) {
+                    $rawValue  = (float) $brand->score->{$field};
+                    $criteriaName = $fieldCriteriaMap[$field];
+                    $type = $criteriaTypes[$criteriaName] ?? 'benefit';
+
+                    // Normalisasi SAW
+                    if ($type === 'cost') {
+                        // Cost: min / nilai
+                        $normalized = $maxMin[$field]['min'] > 0 && $rawValue > 0
+                            ? $maxMin[$field]['min'] / $rawValue
+                            : 0;
+                    } else {
+                        // Benefit: nilai / max
+                        $normalized = $maxMin[$field]['max'] > 0
+                            ? $rawValue / $maxMin[$field]['max']
+                            : 0;
+                    }
+
+                    // Cari bobot berdasarkan nama kriteria
+                    $criteriaId = $criterias->firstWhere('name', ucfirst($criteriaName))?->id
+                        ?? $criterias->firstWhere('name', ucwords($criteriaName))?->id
+                        ?? $criterias->filter(fn($c) => strtolower($c->name) === $criteriaName)->first()?->id;
+
+                    $weight = $criteriaId ? ($weights[$criteriaId] ?? 0) : 0;
+
+                    $weightedScore = $normalized * $weight;
+                    $finalScore   += $weightedScore;
+
+                    $detailScores[$field] = [
+                        'raw'        => $rawValue,
+                        'normalized' => round($normalized, 6),
+                        'weight'     => round($weight, 6),
+                        'weighted'   => round($weightedScore, 6),
+                        'type'       => $type,
+                    ];
+                }
+
+                $scores[$brand->id] = $finalScore;
+
+                // Simpan detail ke tabel ranking_results (update atau create)
+                RankingResult::updateOrCreate(
+                    ['brand_id' => $brand->id],
+                    [
+                        'final_score'   => $finalScore,
+                        'ranking'       => 0, // akan di-update setelah sorting per kategori
+                        'detail_scores' => $detailScores,
+                    ]
+                );
+            }
+
+            // Urutkan dan update ranking per kategori
+            arsort($scores);
+            $rank = 1;
+            foreach ($scores as $brandId => $score) {
+                RankingResult::where('brand_id', $brandId)->update(['ranking' => $rank]);
+                $rank++;
+            }
         }
     }
 
