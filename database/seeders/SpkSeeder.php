@@ -52,34 +52,34 @@ class SpkSeeder extends Seeder
 
         // ── 4. Brand ───────────────────────────────────────────────────
         // Kategori Semen
-        $semenGresik = Brand::firstOrCreate(['name' => 'Semen Gresik', 'category_id' => $semen->id]);
-        $tigaRoda    = Brand::firstOrCreate(['name' => 'Tiga Roda',    'category_id' => $semen->id]);
-        $dynamix     = Brand::firstOrCreate(['name' => 'Dynamix',      'category_id' => $semen->id]);
+        $semenGresik = Brand::updateOrCreate(['name' => 'Semen Gresik', 'category_id' => $semen->id], ['satuan' => '50 kg']);
+        $tigaRoda    = Brand::updateOrCreate(['name' => 'Tiga Roda',    'category_id' => $semen->id], ['satuan' => '50 kg']);
+        $dynamix     = Brand::updateOrCreate(['name' => 'Dynamix',      'category_id' => $semen->id], ['satuan' => '50 kg']);
 
         // Kategori Pasir
-        $pasirLumajang = Brand::firstOrCreate(['name' => 'Pasir Lumajang', 'category_id' => $pasir->id]);
-        $pasirBangka   = Brand::firstOrCreate(['name' => 'Pasir Bangka',   'category_id' => $pasir->id]);
-        $pasirCilegon  = Brand::firstOrCreate(['name' => 'Pasir Cilegon',  'category_id' => $pasir->id]);
+        $pasirLumajang = Brand::updateOrCreate(['name' => 'Pasir Lumajang', 'category_id' => $pasir->id], ['satuan' => 'per m3']);
+        $pasirBangka   = Brand::updateOrCreate(['name' => 'Pasir Bangka',   'category_id' => $pasir->id], ['satuan' => 'per m3']);
+        $pasirCilegon  = Brand::updateOrCreate(['name' => 'Pasir Cilegon',  'category_id' => $pasir->id], ['satuan' => 'per m3']);
 
         // Kategori Cat
-        $avian      = Brand::firstOrCreate(['name' => 'Avian',       'category_id' => $cat->id]);
-        $nipponPaint = Brand::firstOrCreate(['name' => 'Nippon Paint','category_id' => $cat->id]);
-        $dulux      = Brand::firstOrCreate(['name' => 'Dulux',        'category_id' => $cat->id]);
+        $avian       = Brand::updateOrCreate(['name' => 'Avian',        'category_id' => $cat->id], ['satuan' => '5 kg']);
+        $nipponPaint = Brand::updateOrCreate(['name' => 'Nippon Paint', 'category_id' => $cat->id], ['satuan' => '5 kg']);
+        $dulux       = Brand::updateOrCreate(['name' => 'Dulux',        'category_id' => $cat->id], ['satuan' => '5 kg']);
 
         // ── 5. Nilai Penilaian Brand ───────────────────────────────────
         // Semen (nilai contoh: Harga=harga relatif, Kualitas & Minat Pasar=skor 1-10)
-        BrandScore::updateOrCreate(['brand_id' => $semenGresik->id], ['harga' => 8, 'kualitas' => 9, 'minat_pasar' => 9]);
-        BrandScore::updateOrCreate(['brand_id' => $tigaRoda->id],    ['harga' => 7, 'kualitas' => 8, 'minat_pasar' => 7]);
-        BrandScore::updateOrCreate(['brand_id' => $dynamix->id],     ['harga' => 6, 'kualitas' => 7, 'minat_pasar' => 6]);
+        BrandScore::updateOrCreate(['brand_id' => $semenGresik->id], ['harga' => 70000, 'kualitas' => 92, 'minat_pasar' => 95]);
+        BrandScore::updateOrCreate(['brand_id' => $tigaRoda->id],    ['harga' => 70000, 'kualitas' => 90, 'minat_pasar' => 88]);
+        BrandScore::updateOrCreate(['brand_id' => $dynamix->id],     ['harga' => 68000, 'kualitas' => 85, 'minat_pasar' => 80]);
 
         // Pasir
-        BrandScore::updateOrCreate(['brand_id' => $pasirLumajang->id], ['harga' => 9, 'kualitas' => 9, 'minat_pasar' => 8]);
-        BrandScore::updateOrCreate(['brand_id' => $pasirBangka->id],   ['harga' => 7, 'kualitas' => 8, 'minat_pasar' => 7]);
-        BrandScore::updateOrCreate(['brand_id' => $pasirCilegon->id],  ['harga' => 8, 'kualitas' => 7, 'minat_pasar' => 6]);
+        BrandScore::updateOrCreate(['brand_id' => $pasirLumajang->id], ['harga' => 280000, 'kualitas' => 90, 'minat_pasar' => 85]);
+        BrandScore::updateOrCreate(['brand_id' => $pasirBangka->id],   ['harga' => 320000, 'kualitas' => 95, 'minat_pasar' => 80]);
+        BrandScore::updateOrCreate(['brand_id' => $pasirCilegon->id],  ['harga' => 250000, 'kualitas' => 80, 'minat_pasar' => 75]);
 
         // Cat
-        BrandScore::updateOrCreate(['brand_id' => $avian->id],       ['harga' => 6, 'kualitas' => 8, 'minat_pasar' => 9]);
-        BrandScore::updateOrCreate(['brand_id' => $nipponPaint->id],  ['harga' => 8, 'kualitas' => 9, 'minat_pasar' => 8]);
-        BrandScore::updateOrCreate(['brand_id' => $dulux->id],        ['harga' => 9, 'kualitas' => 9, 'minat_pasar' => 7]);
+        BrandScore::updateOrCreate(['brand_id' => $avian->id],        ['harga' => 165000, 'kualitas' => 80, 'minat_pasar' => 85]);
+        BrandScore::updateOrCreate(['brand_id' => $nipponPaint->id],  ['harga' => 210000, 'kualitas' => 95, 'minat_pasar' => 90]);
+        BrandScore::updateOrCreate(['brand_id' => $dulux->id],        ['harga' => 235000, 'kualitas' => 98, 'minat_pasar' => 92]);
     }
 }

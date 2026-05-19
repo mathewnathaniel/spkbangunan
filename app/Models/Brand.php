@@ -12,6 +12,8 @@ class Brand extends Model
         'category_id',
         'name',
         'description',
+        'image',
+        'satuan',
     ];
 
     public function category(): BelongsTo

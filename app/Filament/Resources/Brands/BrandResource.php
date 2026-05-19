@@ -43,6 +43,16 @@ class BrandResource extends Resource
                 ->required()
                 ->maxLength(255),
 
+            Forms\Components\TextInput::make('satuan')
+                ->label('Satuan')
+                ->maxLength(255),
+
+            Forms\Components\FileUpload::make('image')
+                ->label('Gambar Brand')
+                ->image()
+                ->directory('brands')
+                ->maxSize(2048),
+
             Forms\Components\Textarea::make('description')
                 ->label('Deskripsi')
                 ->rows(3),
@@ -60,10 +70,18 @@ class BrandResource extends Resource
                     ->badge()
                     ->color('success'),
 
+                Tables\Columns\ImageColumn::make('image')
+                    ->label('Gambar')
+                    ->square(),
+
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama Brand')
                     ->searchable()
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('satuan')
+                    ->label('Satuan')
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('score.harga')
                     ->label('Harga')
