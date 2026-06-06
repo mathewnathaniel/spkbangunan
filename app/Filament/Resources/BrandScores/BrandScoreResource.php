@@ -8,6 +8,9 @@ use App\Filament\Resources\BrandScores\Pages\ListBrandScores;
 use App\Models\Brand;
 use App\Models\BrandScore;
 use BackedEnum;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -42,31 +45,31 @@ class BrandScoreResource extends Resource
                 ->unique(ignoreRecord: true),
 
             Forms\Components\TextInput::make('harga')
-                ->label('Nilai Harga (1-10)')
+                ->label('Nilai Harga ')
                 ->helperText('Makin rendah harga = makin bagus (kriteria Cost)')
                 ->numeric()
                 ->required()
                 ->minValue(1)
-                ->maxValue(10)
-                ->step(0.01),
+                // ->maxValue(10)
+                ->step(0.1),
 
             Forms\Components\TextInput::make('kualitas')
-                ->label('Nilai Kualitas (1-10)')
+                ->label('Nilai Kualitas ')
                 ->helperText('Makin tinggi = makin bagus (kriteria Benefit)')
                 ->numeric()
                 ->required()
                 ->minValue(1)
-                ->maxValue(10)
-                ->step(0.01),
+                // ->maxValue(10)
+                ->step(0.1),
 
             Forms\Components\TextInput::make('minat_pasar')
-                ->label('Nilai Minat Pasar (1-10)')
+                ->label('Nilai Minat Pasar ')
                 ->helperText('Makin tinggi = makin diminati (kriteria Benefit)')
                 ->numeric()
                 ->required()
                 ->minValue(1)
-                ->maxValue(10)
-                ->step(0.01),
+                // ->maxValue(1000)
+                ->step(0.1),
         ]);
     }
 
@@ -110,8 +113,12 @@ class BrandScoreResource extends Resource
             ])
             ->filters([])
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+               ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
+                // \Filament\Actions\EditAction::make(), --- IGNORE ---
+                // \Filament\Actions\DeleteAction::make(), --- IGNORE ---
             ])
             ->bulkActions([
                 \Filament\Actions\DeleteBulkAction::make(),
