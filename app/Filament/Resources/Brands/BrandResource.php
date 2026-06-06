@@ -8,6 +8,9 @@ use App\Filament\Resources\Brands\Pages\ListBrands;
 use App\Models\Brand;
 use App\Models\Category;
 use BackedEnum;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -46,6 +49,27 @@ class BrandResource extends Resource
             Forms\Components\TextInput::make('satuan')
                 ->label('Satuan')
                 ->maxLength(255),
+            
+            // Forms\Components\TextInput::make('harga')
+            //     ->label('Harga')
+            //     ->numeric()
+            //     ->required()
+            //     ->minValue(0)
+            //     ->step(0.01),
+
+            // Forms\Components\TextInput::make('kualitas')
+            //     ->label('Kualitas')
+            //     ->numeric()
+            //     ->required()
+            //     ->minValue(0)
+            //     ->step(0.01),
+            
+            // Forms\Components\TextInput::make('minat_pasar')
+            //     ->label('Minat Pasar')
+            //     ->numeric()
+            //     ->required()
+            //     ->minValue(0)
+            //     ->step(0.01),
 
             Forms\Components\FileUpload::make('image')
                 ->label('Gambar Brand')
@@ -120,8 +144,10 @@ class BrandResource extends Resource
                     ->options(Category::all()->pluck('name', 'id')),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->bulkActions([
                 \Filament\Actions\DeleteBulkAction::make(),

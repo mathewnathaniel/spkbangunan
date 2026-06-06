@@ -8,6 +8,9 @@ use App\Filament\Resources\AhpComparisons\Pages\ListAhpComparisons;
 use App\Models\AhpComparison;
 use App\Models\Criteria;
 use BackedEnum;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -89,8 +92,10 @@ class AhpComparisonResource extends Resource
             ])
             ->filters([])
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->bulkActions([
                 \Filament\Actions\DeleteBulkAction::make(),

@@ -106,11 +106,11 @@
                     <a href="{{ route('compare') }}" class="text-slate-300 hover:text-accent transition font-medium border-b-2 border-transparent hover:border-accent pb-1">Perbandingan</a>
                 </div>
                 
-                <div class="hidden md:flex items-center">
+                <!-- <div class="hidden md:flex items-center">
                     <a href="/admin/login" class="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full font-medium transition backdrop-blur-sm border border-white/10">
                         Admin Login
                     </a>
-                </div>
+                </div> -->
             </div>
         </div>
     </nav>
