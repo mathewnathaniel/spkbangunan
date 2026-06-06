@@ -85,35 +85,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased overflow-x-hidden">
 
-    <!-- Navbar -->
-    <nav class="fixed w-full z-50 transition-all duration-300" id="navbar">
-        <div class="absolute inset-0 bg-navy-900/90 backdrop-blur-md"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-            <div class="flex justify-between items-center h-20">
-                <div class="flex items-center gap-2">
-                    <!-- Logo Icon Placeholder -->
-                    <div class="w-10 h-10 rounded-lg bg-accent flex items-center justify-center font-bold text-navy-900 text-xl">
-                        A
-                    </div>
-                    <span class="text-white font-bold text-xl tracking-tight">AAN KULI <span class="text-accent">STORE</span></span>
-                </div>
-                
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex space-x-8 items-center">
-                    <a href="#" class="text-slate-300 hover:text-white transition font-medium">Beranda</a>
-                    <a href="#kategori" class="text-slate-300 hover:text-white transition font-medium">Kategori</a>
-                    <a href="#produk" class="text-slate-300 hover:text-white transition font-medium">Produk</a>
-                    <a href="{{ route('compare') }}" class="text-slate-300 hover:text-accent transition font-medium border-b-2 border-transparent hover:border-accent pb-1">Perbandingan</a>
-                </div>
-                
-                <div class="hidden md:flex items-center">
-                    <a href="/admin/login" class="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full font-medium transition backdrop-blur-sm border border-white/10">
-                        Admin Login
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
+        @include('partials.navbar')
 
     <!-- Hero Section -->
     <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-navy-900 overflow-hidden">
@@ -200,7 +172,7 @@
             </div>
 
             <!-- Categories Grid (acting as carousel for now) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 category-items">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 category-items">
                 @forelse($categories as $category)
                     <div class="group cursor-pointer rounded-2xl bg-slate-50 border border-slate-100 p-8 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-accent/30 relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent to-orange-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
@@ -219,10 +191,10 @@
                         <h4 class="text-2xl font-bold text-navy-900 mb-2">{{ $category->name }}</h4>
                         <p class="text-slate-500 mb-6">{{ $category->brands->count() }} Produk Tersedia</p>
                         
-                        <div class="inline-flex items-center text-accent font-semibold group-hover:text-accent-hover">
+                        <a href="{{ route('category.show', $category->id) }}" class="inline-flex items-center text-accent font-semibold group-hover:text-accent-hover">
                             Lihat Produk
                             <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                        </div>
+                        </a>
                     </div>
                 @empty
                     <!-- Fallback Categories -->
@@ -259,11 +231,14 @@
                 @forelse($featuredProducts as $product)
                     <div class="product-card bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group">
                         <div class="product-image-container h-60 w-full relative">
-                            <!-- Placeholder image colored based on category -->
-                            <div class="product-image absolute inset-0 w-full h-full object-cover rounded-t-2xl flex items-center justify-center text-6xl font-black text-slate-200" 
-                                style="background-color: {{ ['#f1f5f9', '#f0fdf4', '#fef3c7', '#eff6ff'][crc32($product->name) % 4] }}">
-                                {{ substr($product->name, 0, 1) }}
-                            </div>
+                            @if(!empty($product->image))
+                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="absolute inset-0 w-full h-full object-cover rounded-t-2xl" />
+                            @else
+                                <div class="product-image absolute inset-0 w-full h-full object-cover rounded-t-2xl flex items-center justify-center text-6xl font-black text-slate-200" 
+                                    style="background-color: {{ ['#f1f5f9', '#f0fdf4', '#fef3c7', '#eff6ff'][crc32($product->name) % 4] }}">
+                                    {{ substr($product->name, 0, 1) }}
+                                </div>
+                            @endif
                             
                             <!-- Hover Overlay -->
                             <div class="hover-overlay z-10">
@@ -279,16 +254,18 @@
                                 </span>
                             </div>
                         </div>
-                        
                         <div class="p-6">
                             <div class="flex justify-between items-start mb-2">
                                 <h4 class="text-xl font-bold text-navy-900 line-clamp-1">{{ $product->name }}</h4>
-                                <div class="flex items-center text-accent">
+                                <p class="text-slate-500 text-sm mt-2">{{ \Illuminate\Support\Str::limit($product->description ?? 'Deskripsi belum tersedia', 120) }}</p>
+                                    <div class="flex items-center text-accent">
                                     <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                                     <span class="text-sm font-bold ml-1 text-slate-700">5.0</span>
                                 </div>
                             </div>
-                            <p class="text-slate-500 text-sm mb-4">Kemasan: {{ $product->satuan ?? '-' }}</p>
+                            <p class="text-slate-500 text-sm mb-2">Kemasan: {{ $product->satuan ?? '-' }}</p>
+                            <p class="text-slate-500 text-sm mb-2">Harga: {{ $product->score ? number_format($product->score->harga,0,',','.') : '-' }}</p>
+                            <p class="text-slate-500 text-sm mb-4">Kualitas: {{ $product->score ? number_format($product->score->kualitas,2) : '-' }} • Minat Pasar: {{ $product->score ? number_format($product->score->minat_pasar,2) : '-' }}</p>
                             
                             <div class="flex items-center justify-between mt-6 pt-6 border-t border-slate-100">
                                 <div>
