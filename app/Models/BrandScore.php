@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Services\SpkService;
 
 class BrandScore extends Model
 {
@@ -23,5 +24,23 @@ class BrandScore extends Model
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function (self $model) {
+            try {
+                (new SpkService())->calculateSawRanking();
+            } catch (\Exception $e) {
+                // jangan lempar error ke UI admin, cukup log jika perlu
+            }
+        });
+
+        static::deleted(function (self $model) {
+            try {
+                (new SpkService())->calculateSawRanking();
+            } catch (\Exception $e) {
+            }
+        });
     }
 }
