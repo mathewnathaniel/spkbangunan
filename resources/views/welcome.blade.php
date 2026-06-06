@@ -85,7 +85,35 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased overflow-x-hidden">
 
-        @include('partials.navbar')
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 transition-all duration-300" id="navbar">
+        <div class="absolute inset-0 bg-navy-900/90 backdrop-blur-md"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center gap-2">
+                    <!-- Logo Icon Placeholder -->
+                    <div class="w-10 h-10 rounded-lg bg-accent flex items-center justify-center font-bold text-navy-900 text-xl">
+                        A
+                    </div>
+                    <span class="text-white font-bold text-xl tracking-tight">AAN KULI <span class="text-accent">STORE</span></span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#" class="text-slate-300 hover:text-white transition font-medium">Beranda</a>
+                    <a href="#kategori" class="text-slate-300 hover:text-white transition font-medium">Kategori</a>
+                    <a href="#produk" class="text-slate-300 hover:text-white transition font-medium">Produk</a>
+                    <a href="{{ route('compare') }}" class="text-slate-300 hover:text-accent transition font-medium border-b-2 border-transparent hover:border-accent pb-1">Perbandingan</a>
+                </div>
+                
+                <div class="hidden md:flex items-center">
+                    <a href="/admin/login" class="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full font-medium transition backdrop-blur-sm border border-white/10">
+                        Admin Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
     <!-- Hero Section -->
     <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-navy-900 overflow-hidden">

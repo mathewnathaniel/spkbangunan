@@ -25,22 +25,4 @@ class BrandScore extends Model
     {
         return $this->belongsTo(Brand::class);
     }
-
-    protected static function booted(): void
-    {
-        static::saved(function (self $model) {
-            try {
-                (new SpkService())->calculateSawRanking();
-            } catch (\Exception $e) {
-                // jangan lempar error ke UI admin, cukup log jika perlu
-            }
-        });
-
-        static::deleted(function (self $model) {
-            try {
-                (new SpkService())->calculateSawRanking();
-            } catch (\Exception $e) {
-            }
-        });
-    }
 }

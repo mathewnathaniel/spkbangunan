@@ -127,19 +127,38 @@ class SpkService
             }
 
             // Kumpulkan nilai tiap kriteria untuk normalisasi per kategori
+            // Hanya ambil nilai numerik yang ada (hindari memasukkan 0/null dari brand tanpa score)
             $criteriaValues = [];
             foreach (['harga', 'kualitas', 'minat_pasar'] as $field) {
-                $criteriaValues[$field] = $brands->map(fn($b) => $b->score ? (float) $b->score->{$field} : 0)->toArray();
+                $values = $brands->map(fn($b) => $b->score ? $b->score->{$field} : null)
+                    ->filter(fn($v) => is_numeric($v))
+                    ->map(fn($v) => (float) $v)
+                    ->values()
+                    ->toArray();
+
+                $criteriaValues[$field] = $values;
             }
 
             // Tentukan max dan min untuk normalisasi per kategori
             $maxMin = [];
             foreach (['harga', 'kualitas', 'minat_pasar'] as $field) {
-                // Ensure arrays are not empty before passing to max/min
-                $values = !empty($criteriaValues[$field]) ? $criteriaValues[$field] : [1];
+                $values = $criteriaValues[$field];
+
+                // fallback jika tidak ada nilai sama sekali
+                if (empty($values)) {
+                    $max = 1;
+                    $min = 1;
+                } else {
+                    $max = max($values);
+
+                    // Untuk min (cost) gunakan nilai positif terkecil (>0). Jika tidak ada, fallback ke max atau 1.
+                    $positive = array_values(array_filter($values, fn($v) => $v > 0));
+                    $min = !empty($positive) ? min($positive) : ($max > 0 ? $max : 1);
+                }
+
                 $maxMin[$field] = [
-                    'max' => max($values) ?: 1,
-                    'min' => min($values) ?: 1,
+                    'max' => $max > 0 ? $max : 1,
+                    'min' => $min > 0 ? $min : 1,
                 ];
             }
 
@@ -155,14 +174,14 @@ class SpkService
                 $detailScores = [];
 
                 foreach (['harga', 'kualitas', 'minat_pasar'] as $field) {
-                    $rawValue  = (float) $brand->score->{$field};
+                    $rawValue  = is_numeric($brand->score->{$field}) ? (float) $brand->score->{$field} : 0;
                     $criteriaName = $fieldCriteriaMap[$field];
                     $type = $criteriaTypes[$criteriaName] ?? 'benefit';
 
                     // Normalisasi SAW
                     if ($type === 'cost') {
-                        // Cost: min / nilai
-                        $normalized = $maxMin[$field]['min'] > 0 && $rawValue > 0
+                        // Cost: min_positive / nilai (nilai > 0)
+                        $normalized = $rawValue > 0
                             ? $maxMin[$field]['min'] / $rawValue
                             : 0;
                     } else {
@@ -173,9 +192,9 @@ class SpkService
                     }
 
                     // Cari bobot berdasarkan nama kriteria
-                    $criteriaId = $criterias->firstWhere('name', ucfirst($criteriaName))?->id
-                        ?? $criterias->firstWhere('name', ucwords($criteriaName))?->id
-                        ?? $criterias->filter(fn($c) => strtolower($c->name) === $criteriaName)->first()?->id;
+                    // Cari criteria id dengan normalisasi nama untuk mengurangi mismatches
+                    $normalizedCriteriaName = str_replace(' ', '', strtolower($criteriaName));
+                    $criteriaId = $criterias->firstWhere(fn($c) => str_replace(' ', '', strtolower($c->name)) === $normalizedCriteriaName)?->id;
 
                     $weight = $criteriaId ? ($weights[$criteriaId] ?? 0) : 0;
 
