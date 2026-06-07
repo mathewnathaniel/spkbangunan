@@ -73,34 +73,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           @forelse($brands as $b)
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
-              <div class="h-44 w-full bg-slate-100 flex items-center justify-center">
-                @if($b->image)
-                  <img src="{{ asset('storage/' . $b->image) }}" alt="{{ $b->name }}" class="h-full w-full object-cover">
-                @else
-                  <div class="text-6xl font-bold text-slate-300">{{ substr($b->name,0,1) }}</div>
-                @endif
-              </div>
-              <div class="p-5">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <div class="text-xs text-slate-400">Kategori</div>
-                    <div class="font-bold text-lg">{{ $b->category?->name ?? '-' }}</div>
-                  </div>
-                  <div class="text-right">
-                    <div class="text-xs text-slate-400">Skor SAW</div>
-                    <div class="font-extrabold">{{ number_format($b->rankingResult?->final_score ?? 0,4) }}</div>
-                  </div>
-                </div>
-                <p class="text-slate-500 mt-3 font-semibold">{{ $b->name }}</p>
-                <p class="text-slate-500 text-sm mt-2">{{ \Illuminate\Support\Str::limit($b->description ?? 'Deskripsi belum tersedia', 150) }}</p>
-                <div class="mt-4 flex items-center justify-between">
-                  <div class="text-sm text-slate-600">Kemasan: {{ $b->satuan ?? '-' }}</div>
-                  <a href="{{ route('category.show', $b->category?->id ?? 0) }}" class="text-accent font-semibold">Lihat Kategori</a>
-                </div>
-                <div class="mt-2 text-sm text-slate-700">Harga: {{ $b->score ? number_format($b->score->harga,0,',','.') : '-' }}</div>
-              </div>
-            </div>
+            @include('components.brand-card', ['item' => $b])
           @empty
             <div class="col-span-full text-center py-12 text-slate-500">Belum ada produk.</div>
           @endforelse

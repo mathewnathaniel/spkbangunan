@@ -28,22 +28,8 @@ class BrandScore extends Model
 
     protected static function booted(): void
     {
-<<<<<<<<< Temporary merge branch 1
-        static::saved(function (self $model) {
-            try {
-                (new SpkService())->calculateSawRanking();
-            } catch (\Exception $e) {
-                // jangan lempar error ke UI admin, cukup log jika perlu
-            }
-        });
-
-        static::deleted(function (self $model) {
-            try {
-                (new SpkService())->calculateSawRanking();
-            } catch (\Exception $e) {
-=========
         // Recalculate SPK setiap kali skor brand berubah atau dihapus
-        static::saved(function () {
+        static::saved(function (self $model) {
             try {
                 (new SpkService())->calculateSawRanking();
             } catch (\Throwable $e) {
@@ -51,11 +37,11 @@ class BrandScore extends Model
             }
         });
 
-        static::deleted(function () {
+        static::deleted(function (self $model) {
             try {
                 (new SpkService())->calculateSawRanking();
             } catch (\Throwable $e) {
->>>>>>>>> Temporary merge branch 2
+                // jangan lempar exception di model events — log jika perlu
             }
         });
     }
