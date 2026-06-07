@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\Criterias\Tables;
 
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Table;
+use Monolog\Handler\FingersCrossed\ActivationStrategyInterface;
 
 class CriteriasTable
 {
@@ -30,7 +32,10 @@ class CriteriasTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    // DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

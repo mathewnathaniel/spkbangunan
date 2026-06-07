@@ -22,7 +22,7 @@ class HomeController extends Controller
             })
             ->take(6);
 
-        return view('welcome', compact('categories', 'featuredProducts'));
+        return view('components.welcome', compact('categories', 'featuredProducts'));
     }
 
     public function compare()
@@ -44,7 +44,7 @@ class HomeController extends Controller
             return [$cat->name => $rows];
         })->toArray();
 
-        return view('compare', [
+        return view('components.compare', [
             'criterias' => $criterias,
             'categories' => $categories,
             'data' => $data,
@@ -88,16 +88,119 @@ class HomeController extends Controller
         $brandsList = Brand::select('id','name')->get();
         $satuanList = Brand::whereNotNull('satuan')->pluck('satuan')->unique()->values();
 
-        return view('products', compact('brands','categories','brandsList','satuanList','categoryId','brandId','satuan','sort'));
+        return view('components.products', compact('brands','categories','brandsList','satuanList','categoryId','brandId','satuan','sort'));
     }
 
     public function category($id)
     {
         $category = Category::with(['brands.rankingResult', 'brands.score'])->findOrFail($id);
 
-        return view('category', [
+        return view('components.category', [
             'category' => $category,
             'brands'   => $category->brands,
         ]);
     }
+
+    public function show($id)
+    {
+        $brand = Brand::with(['category', 'score', 'rankingResult'])->findOrFail($id);
+
+        return view('components.brand-show', [
+            'brand' => $brand,
+        ]);
+    }
+
+    public function search(Request $request)
+    {
+        $q = trim($request->query('q', ''));
+
+        $brands = Brand::with(['category','score','rankingResult'])
+            ->when($q !== '', function($query) use ($q) {
+                $query->where('name', 'like', "%{$q}%")
+                    ->orWhere('description', 'like', "%{$q}%")
+                    ->orWhereHas('category', function($c) use ($q) {
+                        $c->where('name', 'like', "%{$q}%");
+                    });
+            })
+            ->get();
+
+        return view('components.search', compact('brands','q'));
+    }
+
+    public function assistant(Request $request)
+    {
+        return view('components.assistant');
+    }
+
+    public function assistantRecommend(Request $request)
+    {
+        $prompt = trim($request->input('prompt', ''));
+
+        if ($prompt === '') {
+            return response()->json(['error' => 'Masukkan pertanyaan atau kata kunci.'], 422);
+        }
+
+        $lower = mb_strtolower($prompt, 'UTF-8');
+
+        // Try to match category keywords
+        $categories = Category::all();
+        $matchedCategory = null;
+        foreach ($categories as $cat) {
+            if (str_contains(mb_strtolower($cat->name, 'UTF-8'), $lower) || str_contains($lower, mb_strtolower($cat->name, 'UTF-8'))) {
+                $matchedCategory = $cat;
+                break;
+            }
+        }
+
+        if ($matchedCategory) {
+            $brands = Brand::with(['category','score','rankingResult'])
+                ->where('category_id', $matchedCategory->id)
+                ->get()
+                ->sortByDesc(function($b) { return $b->rankingResult?->final_score ?? 0; })
+                ->values()
+                ->take(8);
+
+            $explanation = "Rekomendasi untuk kategori: {$matchedCategory->name}";
+        } else {
+            // If user asks for "murah" or "hemat", recommend low price
+            if (str_contains($lower, 'murah') || str_contains($lower, 'hemat') || str_contains($lower, 'tersedia murah')) {
+                $brands = Brand::with(['category','score','rankingResult'])
+                    ->get()
+                    ->sortBy(function($b) { return $b->score?->harga ?? PHP_INT_MAX; })
+                    ->values()
+                    ->take(8);
+
+                $explanation = 'Rekomendasi produk dengan harga terendah (murah).';
+            } else {
+                // Default: top ranked products
+                $brands = Brand::with(['category','score','rankingResult'])
+                    ->get()
+                    ->sortByDesc(function($b) { return $b->rankingResult?->final_score ?? 0; })
+                    ->values()
+                    ->take(8);
+
+                $explanation = 'Rekomendasi produk unggulan berdasarkan skor.';
+            }
+        }
+
+        // Map to simple array for frontend
+        $items = $brands->map(function($b) {
+            return [
+                'id' => $b->id,
+                'name' => $b->name,
+                'description' => $b->description,
+                'image' => $b->image ? asset('storage/' . $b->image) : null,
+                'url' => route('brand.show', $b->id),
+                'price' => $b->score?->harga ? number_format($b->score->harga,0,',','.') : '-',
+                'score' => $b->rankingResult?->final_score ?? 0,
+                'category' => $b->category?->name,
+            ];
+        });
+
+        return response()->json([
+            'explanation' => $explanation,
+            'items' => $items,
+        ]);
+    }
 }
+

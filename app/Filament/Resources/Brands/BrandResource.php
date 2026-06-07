@@ -8,6 +8,9 @@ use App\Filament\Resources\Brands\Pages\ListBrands;
 use App\Models\Brand;
 use App\Models\Category;
 use BackedEnum;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -50,8 +53,9 @@ class BrandResource extends Resource
             Forms\Components\FileUpload::make('image')
                 ->label('Gambar Brand')
                 ->image()
+                ->disk('public')
                 ->directory('brands')
-                ->maxSize(2048),
+                ->maxSize(5120),
 
             Forms\Components\Textarea::make('description')
                 ->label('Deskripsi')
@@ -120,8 +124,10 @@ class BrandResource extends Resource
                     ->options(Category::all()->pluck('name', 'id')),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->bulkActions([
                 \Filament\Actions\DeleteBulkAction::make(),

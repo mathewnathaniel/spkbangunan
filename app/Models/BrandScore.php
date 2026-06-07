@@ -28,18 +28,20 @@ class BrandScore extends Model
 
     protected static function booted(): void
     {
+        // Recalculate SPK setiap kali skor brand berubah atau dihapus
         static::saved(function (self $model) {
             try {
                 (new SpkService())->calculateSawRanking();
-            } catch (\Exception $e) {
-                // jangan lempar error ke UI admin, cukup log jika perlu
+            } catch (\Throwable $e) {
+                // jangan lempar exception di model events — log jika perlu
             }
         });
 
         static::deleted(function (self $model) {
             try {
                 (new SpkService())->calculateSawRanking();
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
+                // jangan lempar exception di model events — log jika perlu
             }
         });
     }
