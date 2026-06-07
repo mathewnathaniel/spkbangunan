@@ -85,7 +85,6 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased overflow-x-hidden">
 
-<<<<<<< HEAD
         @include('partials.navbar')
 =======
     <!-- Navbar -->
