@@ -85,8 +85,9 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased overflow-x-hidden">
 
+<<<<<<<<< Temporary merge branch 1
         @include('partials.navbar')
-=======
+=========
     <!-- Navbar -->
     <nav class="fixed w-full z-50 transition-all duration-300" id="navbar">
         <div class="absolute inset-0 bg-navy-900/90 backdrop-blur-md"></div>
@@ -108,15 +109,15 @@
                     <a href="{{ route('compare') }}" class="text-slate-300 hover:text-accent transition font-medium border-b-2 border-transparent hover:border-accent pb-1">Perbandingan</a>
                 </div>
                 
-                <!-- <div class="hidden md:flex items-center">
+                {{-- <div class="hidden md:flex items-center">
                     <a href="/admin/login" class="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full font-medium transition backdrop-blur-sm border border-white/10">
                         Admin Login
                     </a>
-                </div> -->
+                </div> --}}
             </div>
         </div>
     </nav>
->>>>>>> 64bf85ad1cca3aebf835e59802500cf398c23371
+>>>>>>>>> Temporary merge branch 2
 
     <!-- Hero Section -->
     <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-navy-900 overflow-hidden">
