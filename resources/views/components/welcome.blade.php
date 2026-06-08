@@ -40,24 +40,32 @@
             background-color: #f8fafc;
         }
         .product-card .product-image {
-            transition: all 0.5s ease-in-out;
+            transition: transform 0.45s ease, filter 0.45s ease, opacity 0.3s ease;
+            will-change: transform, filter;
         }
         .product-card .hover-overlay {
             position: absolute;
             inset: 0;
             background: rgba(15, 23, 42, 0);
             display: flex;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-end;
+            justify-content: flex-start;
+            padding: 1rem;
             opacity: 0;
-            transition: all 0.4s ease;
+            transition: background 0.35s ease, opacity 0.35s ease;
+            pointer-events: none;
+        }
+        .product-card .overlay-badge{
+            pointer-events: none;
+            transform: translateY(-6px);
+            transition: transform 0.25s ease;
         }
         .product-card:hover .product-image {
-            transform: scale(0.9);
-            opacity: 0.5;
+            transform: scale(1.05);
+            filter: brightness(0.65);
         }
         .product-card:hover .hover-overlay {
-            background: rgba(15, 23, 42, 0.5);
+            background: rgba(15, 23, 42, 0.35);
             opacity: 1;
         }
 

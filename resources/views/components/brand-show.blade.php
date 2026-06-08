@@ -11,7 +11,7 @@
 
     @include('partials.navbar')
 
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 md:pt-28 pb-12">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-2xl shadow overflow-hidden border border-slate-100">
@@ -49,10 +49,10 @@
                     <div class="font-bold">{{ $brand->score ? number_format($brand->score->minat_pasar ?? 0,2) : '-' }}</div>
                 </div>
 
-                <div class="mb-4">
+                <!-- <div class="mb-4">
                     <div class="text-xs text-slate-400">Skor SAW</div>
                     <div class="font-bold">{{ number_format($brand->rankingResult?->final_score ?? 0,4) }}</div>
-                </div>
+                </div> -->
 
                 <div class="mt-6">
                     <a href="javascript:history.back()" class="inline-block w-full text-center bg-accent text-navy-900 font-bold px-4 py-3 rounded-full">Kembali</a>
