@@ -114,15 +114,20 @@ class HomeController extends Controller
     {
         $q = trim($request->query('q', ''));
 
-        $brands = Brand::with(['category','score','rankingResult'])
-            ->when($q !== '', function($query) use ($q) {
-                $query->where('name', 'like', "%{$q}%")
-                    ->orWhere('description', 'like', "%{$q}%")
-                    ->orWhereHas('category', function($c) use ($q) {
-                        $c->where('name', 'like', "%{$q}%");
-                    });
-            })
-            ->get();
+        if ($q === '') {
+            $brands = collect();
+        } else {
+            $brands = Brand::with(['category','score','rankingResult'])
+                ->where(function($query) use ($q) {
+                    $query->where('name', 'like', "%{$q}%")
+                        ->orWhere('description', 'like', "%{$q}%")
+                        ->orWhereHas('category', function($c) use ($q) {
+                            $c->where('name', 'like', "%{$q}%");
+                        });
+                })
+                ->get()
+                ->take(3);
+        }
 
         return view('components.search', compact('brands','q'));
     }
