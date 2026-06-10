@@ -30,24 +30,31 @@ class HomeController extends Controller
         $criterias = \App\Models\Criteria::all();
         $categories = Category::with(['brands.score', 'brands.rankingResult'])->get();
 
-        // Group ranking results per category for display
-        $data = $categories->mapWithKeys(function($cat) {
-            $rows = $cat->brands->map(function($b) {
-                return [
-                    'brand' => $b->name,
-                    'harga' => $b->score?->harga ?? null,
-                    'kualitas' => $b->score?->kualitas ?? null,
-                    'minat_pasar' => $b->score?->minat_pasar ?? null,
-                    'skor' => $b->rankingResult?->final_score ?? 0,
-                ];
-            });
-            return [$cat->name => $rows];
+        $compareData = $categories->map(function($cat) {
+            return [
+                'id' => $cat->id,
+                'name' => $cat->name,
+                'brands' => $cat->brands->map(function($b) {
+                    return [
+                        'id' => $b->id,
+                        'name' => $b->name,
+                        'description' => $b->description ?? 'Deskripsi belum tersedia.',
+                        'image' => $b->image ? asset('storage/' . $b->image) : null,
+                        'satuan' => $b->satuan ?? '-',
+                        'harga' => $b->score ? floatval($b->score->harga) : null,
+                        'kualitas' => $b->score ? floatval($b->score->kualitas) : null,
+                        'minat_pasar' => $b->score ? floatval($b->score->minat_pasar) : null,
+                        'saw_score' => $b->rankingResult ? floatval($b->rankingResult->final_score) : 0,
+                        'rank' => $b->rankingResult ? intval($b->rankingResult->ranking) : null,
+                    ];
+                })->toArray()
+            ];
         })->toArray();
 
         return view('components.compare', [
             'criterias' => $criterias,
             'categories' => $categories,
-            'data' => $data,
+            'compareData' => $compareData,
         ]);
     }
 

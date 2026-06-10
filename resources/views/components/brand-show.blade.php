@@ -54,8 +54,9 @@
                     <div class="font-bold">{{ number_format($brand->rankingResult?->final_score ?? 0,4) }}</div>
                 </div> -->
 
-                <div class="mt-6">
-                    <a href="javascript:history.back()" class="inline-block w-full text-center bg-accent text-navy-900 font-bold px-4 py-3 rounded-full">Kembali</a>
+                <div class="mt-6 space-y-3">
+                    <a href="{{ route('compare', ['category_id' => $brand->category_id, 'b1' => $brand->id]) }}" class="inline-block w-full text-center bg-navy-900 text-white hover:bg-navy-800 font-bold px-4 py-3 rounded-full transition shadow-md">Bandingkan Produk Ini</a>
+                    <a href="javascript:history.back()" class="inline-block w-full text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-3 rounded-full transition border border-slate-200">Kembali</a>
                 </div>
             </aside>
         </div>
