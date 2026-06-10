@@ -55,7 +55,26 @@ class BrandResource extends Resource
                 ->image()
                 ->disk('public')
                 ->directory('brands')
-                ->maxSize(5120),
+                ->preserveFilenames(false)
+                ->maxSize(5120)
+                ->imageResizeMode('cover')
+                ->imageResizeTargetWidth(1200)
+                ->imageResizeTargetHeight(800)
+                ->uploadButtonPosition('left')
+                ->uploadProgressIndicatorPosition('left')
+                ->removeUploadedFileButtonPosition('left')
+                ->getUploadedFileUsing(static function ($component, string $file, $storedFileNames): ?array {
+                    // Return a relative URL so the browser doesn't perform cross-origin requests
+                    if (blank($file)) {
+                        return null;
+                    }
+                    return [
+                        'name' => is_array($storedFileNames) ? ($storedFileNames[$file] ?? basename($file)) : ($storedFileNames ?? basename($file)),
+                        'size' => 0,
+                        'type' => null,
+                        'url' => '/storage/' . ltrim($file, '/'),
+                    ];
+                }),
 
             Forms\Components\Textarea::make('description')
                 ->label('Deskripsi')
@@ -64,6 +83,7 @@ class BrandResource extends Resource
     }
 
     public static function table(Table $table): Table
+
     {
         return $table
             ->columns([
@@ -76,7 +96,8 @@ class BrandResource extends Resource
 
                 Tables\Columns\ImageColumn::make('image')
                     ->label('Gambar')
-                    ->square(),
+                    ->square()
+                    ->disk('public'),
 
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama Brand')
